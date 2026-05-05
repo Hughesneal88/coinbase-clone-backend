@@ -117,11 +117,17 @@ const syncFromCoinGecko = async (req, res, next) => {
       `?vs_currency=usd&order=market_cap_desc&per_page=${safePerPage}&page=${safePage}` +
       `&sparkline=false&price_change_percentage=24h`;
 
-    const cgRes = await fetch(url, {
-      headers: {
-        accept: 'application/json',
-      },
-    });
+    const headers = {
+      accept: 'application/json',
+    };
+
+    // If you have a CoinGecko API key (Demo/Pro), include it via env var.
+    // CoinGecko Demo keys use the 'x-cg-demo-api-key' header.
+    if (process.env.COINGECKO_API_KEY) {
+      headers['x-cg-demo-api-key'] = process.env.COINGECKO_API_KEY;
+    }
+
+    const cgRes = await fetch(url, { headers });
 
     if (!cgRes.ok) {
       return res.status(502).json({
