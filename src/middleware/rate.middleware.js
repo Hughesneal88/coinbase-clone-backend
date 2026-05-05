@@ -29,4 +29,19 @@ const apiLimiter = rateLimit({
   },
 });
 
-module.exports = { authLimiter, apiLimiter };
+/**
+ * Very strict limiter for public sync endpoints.
+ * Prevents abuse and protects upstream providers (CoinGecko) and your DB.
+ */
+const syncLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 2,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many sync requests. Please try again later.',
+  },
+});
+
+module.exports = { authLimiter, apiLimiter, syncLimiter };
