@@ -14,9 +14,25 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
+// Allow local dev and deployed frontend. In production, prefer setting CLIENT_ORIGIN.
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN,
+  'http://localhost:3000',
+  'https://coinbase-clone-hughesneal88.onrender.com',
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+    origin(origin, callback) {
+      // Allow non-browser requests (no Origin header) like curl/Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );
