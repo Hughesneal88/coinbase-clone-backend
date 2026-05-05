@@ -9,7 +9,11 @@ const { errorHandler, notFound } = require('./middleware/error.middleware');
 
 const app = express();
 
-// ── CORS ──────────────────────────────────────────────────────────────────────
+// Render/other reverse proxies set X-Forwarded-For / X-Forwarded-Proto.
+// Enable trust proxy so express-rate-limit can correctly identify clients.
+app.set('trust proxy', 1);
+
+// ── CORS ─────────────────────────────────────────────────────────────────────
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
