@@ -8,7 +8,7 @@ const {
 } = require('../controllers/crypto.controller');
 const { apiLimiter } = require('../middleware/rate.middleware');
 
-// Specific sub-routes must be defined before the generic /:id-style routes
+// Sub-routes must be registered before the root '/' route to avoid conflicts
 router.get('/gainers', apiLimiter, getGainers);
 router.get('/new', apiLimiter, getNewListings);
 router.get('/', apiLimiter, getAllCryptos);

@@ -62,10 +62,23 @@ const createCrypto = async (req, res, next) => {
   try {
     const { name, symbol, price, image, change24h } = req.body;
 
-    if (!name || !symbol || price === undefined || !image || change24h === undefined) {
+    // Pre-validate with type checks before hitting the DB
+    if (!name || !symbol || !image) {
       return res.status(400).json({
         success: false,
-        message: 'name, symbol, price, image, and change24h are all required.',
+        message: 'name, symbol, and image are required strings.',
+      });
+    }
+    if (price === undefined || price === null || isNaN(Number(price)) || Number(price) < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'price must be a non-negative number.',
+      });
+    }
+    if (change24h === undefined || change24h === null || isNaN(Number(change24h))) {
+      return res.status(400).json({
+        success: false,
+        message: 'change24h must be a number.',
       });
     }
 
