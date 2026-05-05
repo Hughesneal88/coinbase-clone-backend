@@ -112,12 +112,13 @@ All responses follow the shape: `{ success, message, data? }`.
 
 ### Crypto
 
-| Method | Path              | Body                                        | Description                           |
-|--------|-------------------|---------------------------------------------|---------------------------------------|
-| GET    | `/crypto`         | —                                           | All crypto assets                     |
-| GET    | `/crypto/gainers` | —                                           | Sorted by `change24h` (highest first) |
-| GET    | `/crypto/new`     | —                                           | Sorted by `createdAt` (newest first)  |
-| POST   | `/crypto`         | `{ name, symbol, price, image, change24h }` | Create a new crypto asset             |
+| Method | Path              | Body                                        | Description                                     |
+|--------|-------------------|---------------------------------------------|-------------------------------------------------|
+| GET    | `/crypto`         | —                                           | All crypto assets                                |
+| GET    | `/crypto/gainers` | —                                           | Sorted by `change24h` (highest first)            |
+| GET    | `/crypto/new`     | —                                           | Sorted by `createdAt` (newest first)             |
+| POST   | `/crypto`         | `{ name, symbol, price, image, change24h }` | Create a new crypto asset                        |
+| POST   | `/crypto/sync`    | —                                           | Sync top market assets from CoinGecko (top 100) |
 
 **Examples (Live API)**
 
@@ -125,6 +126,7 @@ All responses follow the shape: `{ success, message, data? }`.
 - `GET  https://coinbase-clone-backend-xpvg.onrender.com/crypto/gainers`
 - `GET  https://coinbase-clone-backend-xpvg.onrender.com/crypto/new`
 - `POST https://coinbase-clone-backend-xpvg.onrender.com/crypto`
+- `POST https://coinbase-clone-backend-xpvg.onrender.com/crypto/sync`
 
 ---
 

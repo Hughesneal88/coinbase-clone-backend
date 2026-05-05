@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const Crypto = require('../models/Crypto');
 
 /**
@@ -94,4 +95,98 @@ const createCrypto = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllCryptos, getGainers, getNewListings, createCrypto };
+/**
+ * POST /crypto/sync
+ * Sync top market assets from CoinGecko into MongoDB.
+ *
+ * Default: top 100 by market cap (USD).
+ * Optional query params:
+ *  - perPage (1..250)
+ *  - page (>=1)
+ */
+const syncFromCoinGecko = async (req, res, next) => {
+  try {
+    const perPage = Number(req.query.perPage) || 100;
+    const page = Number(req.query.page) || 1;
+
+    const safePerPage = Math.min(Math.max(perPage, 1), 250);
+    const safePage = Math.max(page, 1);
+
+    const url =
+      `https://api.coingecko.com/api/v3/coins/markets` +
+      `?vs_currency=usd&order=market_cap_desc&per_page=${safePerPage}&page=${safePage}` +
+      `&sparkline=false&price_change_percentage=24h`;
+
+    const cgRes = await fetch(url, {
+      headers: {
+        accept: 'application/json',
+      },
+    });
+
+    if (!cgRes.ok) {
+      return res.status(502).json({
+        success: false,
+        message: `CoinGecko request failed: ${cgRes.status} ${cgRes.statusText}`,
+      });
+    }
+
+    const coins = await cgRes.json();
+
+    let created = 0;
+    let updated = 0;
+
+    for (const coin of coins) {
+      const coingeckoId = coin?.id;
+      const name = coin?.name;
+      const symbol = coin?.symbol ? String(coin.symbol).toUpperCase() : undefined;
+      const image = coin?.image;
+      const price = Number(coin?.current_price);
+      const change24h = Number(coin?.price_change_percentage_24h ?? 0);
+
+      // Skip malformed entries
+      if (!coingeckoId || !name || !symbol || !image || Number.isNaN(price)) continue;
+
+      const existed = await Crypto.exists({ coingeckoId });
+
+      await Crypto.findOneAndUpdate(
+        { coingeckoId },
+        {
+          $set: {
+            coingeckoId,
+            name,
+            symbol,
+            image,
+            price,
+            change24h,
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      if (existed) updated += 1;
+      else created += 1;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Market sync completed.',
+      data: {
+        created,
+        updated,
+        total: coins.length,
+        perPage: safePerPage,
+        page: safePage,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  getAllCryptos,
+  getGainers,
+  getNewListings,
+  createCrypto,
+  syncFromCoinGecko,
+};
