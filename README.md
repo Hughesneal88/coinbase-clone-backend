@@ -5,6 +5,16 @@ Provides JWT-based authentication (HTTP-only cookies) and cryptocurrency data en
 
 ---
 
+## Live API (Base URL)
+
+Use this base URL when calling the deployed API:
+
+- **`https://coinbase-clone-backend-xpvg.onrender.com`**
+
+All endpoint paths below are relative to the base URL.
+
+---
+
 ## Prerequisites
 
 - Node.js ≥ 16
@@ -33,14 +43,14 @@ npm start
 
 ## Environment Variables (`.env`)
 
-| Variable        | Description                              | Example                              |
-|-----------------|------------------------------------------|--------------------------------------|
-| `PORT`          | Port the server listens on               | `5000`                               |
-| `MONGO_URI`     | MongoDB connection string                | `mongodb://127.0.0.1:27017/coinbase` |
-| `JWT_SECRET`    | Secret key for signing JWTs              | `a_long_random_string`               |
-| `JWT_EXPIRES_IN`| JWT expiry duration                      | `7d`                                 |
-| `CLIENT_ORIGIN` | Allowed CORS origin (frontend URL)       | `http://localhost:3000`              |
-| `NODE_ENV`      | `development` or `production`            | `development`                        |
+| Variable         | Description                        | Example                              |
+|------------------|------------------------------------|--------------------------------------|
+| `PORT`           | Port the server listens on         | `5000`                               |
+| `MONGO_URI`      | MongoDB connection string          | `mongodb://127.0.0.1:27017/coinbase` |
+| `JWT_SECRET`     | Secret key for signing JWTs        | `a_long_random_string`               |
+| `JWT_EXPIRES_IN` | JWT expiry duration                | `7d`                                 |
+| `CLIENT_ORIGIN`  | Allowed CORS origin (frontend URL) | `http://localhost:3000`              |
+| `NODE_ENV`       | `development` or `production`      | `development`                        |
 
 ---
 
@@ -74,15 +84,21 @@ src/
 
 ## API Endpoints
 
-All responses follow the shape: `{ success, message, data? }`
+All responses follow the shape: `{ success, message, data? }`.
 
 ### Auth
 
-| Method | Path        | Body                           | Description                     |
-|--------|-------------|--------------------------------|---------------------------------|
-| POST   | `/register` | `{ name, email, password }`    | Create account, set JWT cookie  |
-| POST   | `/login`    | `{ email, password }`          | Login, set JWT cookie           |
-| POST   | `/logout`   | —                              | Clear JWT cookie                |
+| Method | Path        | Body                        | Description                    |
+|--------|-------------|-----------------------------|--------------------------------|
+| POST   | `/register` | `{ name, email, password }` | Create account, set JWT cookie |
+| POST   | `/login`    | `{ email, password }`       | Login, set JWT cookie          |
+| POST   | `/logout`   | —                           | Clear JWT cookie               |
+
+**Examples (Live API)**
+
+- `POST https://coinbase-clone-backend-xpvg.onrender.com/register`
+- `POST https://coinbase-clone-backend-xpvg.onrender.com/login`
+- `POST https://coinbase-clone-backend-xpvg.onrender.com/logout`
 
 ### User (Protected – requires valid JWT cookie)
 
@@ -90,14 +106,25 @@ All responses follow the shape: `{ success, message, data? }`
 |--------|------------|---------------------------|
 | GET    | `/profile` | Return authenticated user |
 
+**Example (Live API)**
+
+- `GET https://coinbase-clone-backend-xpvg.onrender.com/profile`
+
 ### Crypto
 
-| Method | Path              | Body                                                  | Description                         |
-|--------|-------------------|-------------------------------------------------------|-------------------------------------|
-| GET    | `/crypto`         | —                                                     | All crypto assets                   |
-| GET    | `/crypto/gainers` | —                                                     | Sorted by `change24h` (highest first)|
-| GET    | `/crypto/new`     | —                                                     | Sorted by `createdAt` (newest first) |
-| POST   | `/crypto`         | `{ name, symbol, price, image, change24h }`           | Create a new crypto asset           |
+| Method | Path              | Body                                        | Description                           |
+|--------|-------------------|---------------------------------------------|---------------------------------------|
+| GET    | `/crypto`         | —                                           | All crypto assets                     |
+| GET    | `/crypto/gainers` | —                                           | Sorted by `change24h` (highest first) |
+| GET    | `/crypto/new`     | —                                           | Sorted by `createdAt` (newest first)  |
+| POST   | `/crypto`         | `{ name, symbol, price, image, change24h }` | Create a new crypto asset             |
+
+**Examples (Live API)**
+
+- `GET  https://coinbase-clone-backend-xpvg.onrender.com/crypto`
+- `GET  https://coinbase-clone-backend-xpvg.onrender.com/crypto/gainers`
+- `GET  https://coinbase-clone-backend-xpvg.onrender.com/crypto/new`
+- `POST https://coinbase-clone-backend-xpvg.onrender.com/crypto`
 
 ---
 
@@ -106,11 +133,13 @@ All responses follow the shape: `{ success, message, data? }`
 When consuming this API from a browser, include credentials so cookies are sent:
 
 **Axios**
+
 ```js
 axios.defaults.withCredentials = true;
 ```
 
 **Fetch**
+
 ```js
 fetch(url, { credentials: 'include' })
 ```
