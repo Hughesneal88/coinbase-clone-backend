@@ -21,14 +21,31 @@ const verifyToken = (token) => {
 };
 
 /**
+ * Parse a duration string (e.g. "7d", "24h", "30m") to milliseconds.
+ * Falls back to 7 days if the value is unrecognised.
+ * @param {string} str
+ * @returns {number} duration in ms
+ */
+const parseDurationMs = (str) => {
+  if (!str) return 7 * 24 * 60 * 60 * 1000;
+  const match = String(str).match(/^(\d+)([smhd])$/);
+  if (!match) return 7 * 24 * 60 * 60 * 1000;
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+  const multipliers = { s: 1000, m: 60 * 1000, h: 3600 * 1000, d: 86400 * 1000 };
+  return value * multipliers[unit];
+};
+
+/**
  * Build cookie options appropriate for the current environment.
+ * maxAge is derived from JWT_EXPIRES_IN to stay in sync with token lifetime.
  * @returns {object} cookie options
  */
 const cookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  maxAge: parseDurationMs(process.env.JWT_EXPIRES_IN),
 });
 
 module.exports = { generateToken, verifyToken, cookieOptions };

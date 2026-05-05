@@ -108,11 +108,9 @@ const login = async (req, res, next) => {
  * Clear the auth cookie.
  */
 const logout = (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  });
+  const opts = cookieOptions();
+  // maxAge of 0 ensures the cookie is deleted immediately
+  res.clearCookie('token', { ...opts, maxAge: 0 });
 
   res.status(200).json({
     success: true,

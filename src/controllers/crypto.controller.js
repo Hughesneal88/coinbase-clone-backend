@@ -38,11 +38,11 @@ const getGainers = async (req, res, next) => {
 
 /**
  * GET /crypto/new
- * Return the most recently listed cryptos.
+ * Return the most recently listed cryptos (limited to 20 entries).
  */
 const getNewListings = async (req, res, next) => {
   try {
-    const cryptos = await Crypto.find().sort({ createdAt: -1 });
+    const cryptos = await Crypto.find().sort({ createdAt: -1 }).limit(20);
 
     res.status(200).json({
       success: true,
